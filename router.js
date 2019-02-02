@@ -1,7 +1,5 @@
 const passportService = require("./services/passport");
 const passport = require("passport");
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const Survey = require("./models/Survey");
 
 // middlewares
 const requireGoogleAuth = passport.authenticate("google", { scope: ["profile", "email"] });
