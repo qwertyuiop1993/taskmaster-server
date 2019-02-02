@@ -25,33 +25,4 @@ module.exports = function(app) {
     res.redirect("/");
   });
 
-  // payment routes
-  app.post("/api/stripe", requireLogin, async (req, res) => {
-    const charge = await stripe.charges.create({
-      amount: 500,
-      currency: "gbp",
-      source: req.body.id, // token obtained with Stripe.js
-      description: `Charge for ${req.body.email}`
-    });
-    // update user's credits
-    req.user.credits += 5;
-    const updatedUser = await req.user.save();
-    // send the updated user to the client
-    res.send(updatedUser);
-  });
-
-  // survey routes
-  app.post("/api/surveys", requireLogin, requireCredit, (req, res) => {
-    const { title, subject, body, recipients } = req.body;
-
-    const newSurvey = newSurvey({
-      title,
-      subject,
-      body,
-      recipients: recipients.split(",").map((email) => ({ email: email.trim() })), // map array of emails to object containing email key value pair
-      _user: req.user.id,
-      dateSent: Date.now()
-    })
-
-  });
 };

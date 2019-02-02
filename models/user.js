@@ -12,17 +12,9 @@ const userSchema = new Schema({
     unique: true,
     lowercase: true
   },
-  password: {
-    type: String,
-    minlength: 6
-  },
   googleID: {
     type: String
   },
-  credits: {
-    type: Number,
-    default: 0,
-  }
 });
 
 
