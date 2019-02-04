@@ -1,6 +1,8 @@
 const passport = require("passport");
 const User = require("../models/user");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const MockStrategy = require("passport-mock-strategy");
+const { users } = require("../tests/seed/seed"); // get test user data for mock login strategy
 
 // serializeUser creates some unique identifying piece of information about a user (like a jwt token does) and lets us put it in a cookie
 passport.serializeUser((user, done) => {
@@ -16,6 +18,30 @@ passport.deserializeUser(async (id, done) => {
     done(err, false);
   }
 });
+
+// Mock strategy for testing
+const mockLogin = new MockStrategy(
+  {
+    name: "mock",
+    user: { id: users[0]["_id"], email: users[0]["email"], googleID: users[0]["googleID"] }
+  },
+  async (user, done) => {
+    const googleID = user.googleID;
+    const email = user.email;
+
+    try {
+      const existingUser = await User.findOne({ googleID: googleID });
+      if (existingUser) {
+        return done(null, existingUser); // if user is found, call done with no error and the user data
+      } else {
+        const newUser = await new User({ email: email, googleID: googleID }).save();
+        done(null, newUser);
+      }
+    } catch (err) {
+      done(err, false);
+    }
+  }
+);
 
 // Google OAuth strategy
 const googleOptions = {
@@ -41,3 +67,4 @@ const googleLogin = new GoogleStrategy(googleOptions, async (accessToken, refres
 });
 
 passport.use(googleLogin);
+passport.use(mockLogin);

@@ -1,6 +1,6 @@
 const { ObjectID } = require("mongodb");
-const User = require("./../../models/user.js");
-const jwt = require("jsonwebtoken");
+const User = require("./../../models/user");
+const { Todo } = require("../../models/todo");
 
 // create mongodb object ID for our fake users
 const userOneId = new ObjectID();
@@ -11,16 +11,38 @@ const users = [
   {
     _id: userOneId,
     email: "test@example.com",
-    password: "password"
+    googleID: "5c5857600e4ce674c3a997d3"
   },
   {
     _id: userTwoId,
     email: "david@ens-lyon.fr",
-    password: "password"
+    googleID: "384758852393837635"
   }
 ];
 
-// function to populate User database with our users
+const todos = [
+  {
+    _id: new ObjectID(),
+    text: "First test todo",
+    _creator: userOneId
+  },
+  {
+    _id: new ObjectID(),
+    text: "Second test todo",
+    completed: true,
+    completedAt: new Date().getTime(),
+    _creator: userTwoId
+  }
+];
+
+const populateTodos = (done) => {
+  Todo.deleteMany({})
+    .then(() => {
+      Todo.insertMany(todos);
+    })
+    .then(() => done());
+};
+
 const populateUsers = (done) => {
   User.deleteMany({}).then(() => {
     let userOne = new User(users[0]).save();
@@ -35,5 +57,7 @@ const populateUsers = (done) => {
 // export users and populateUsers to be used in our test file before every test
 module.exports = {
   users: users,
-  populateUsers: populateUsers
+  populateUsers: populateUsers,
+  todos: todos,
+  populateTodos: populateTodos
 };

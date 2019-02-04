@@ -1,20 +1,26 @@
 const passportService = require("./services/passport");
 const passport = require("passport");
-
+const TodoController = require("./controllers/todoController");
 // middlewares
-const requireGoogleAuth = passport.authenticate("google", { scope: ["profile", "email"] });
+const requireGoogleLogin = passport.authenticate("google", { scope: ["profile", "email"] });
+const requireMockLogin = passport.authenticate("mock");
+
+
 const requireLogin = require("./middlewares/requireLogin");
-const requireCredit = require("./middlewares/requireCredit");
 
 module.exports = function(app) {
   // auth routes
-  app.get("/auth/google", requireGoogleAuth);
+  app.get("/auth/google", requireGoogleLogin);
 
-  app.get("/auth/google/callback", requireGoogleAuth, (req, res) => {
-    res.redirect("/surveys");
+  app.get("/auth/google/callback", requireGoogleLogin, (req, res, next) => {
+    res.send(req.user);
   });
 
-  app.get("/api/current_user", (req, res) => {
+  app.get("/auth/mock", requireMockLogin, (req, res, next) => {
+    res.send(req.user);
+  });
+
+  app.get("/api/current_user", requireLogin, (req, res) => {
     res.send(req.user);
   });
 
@@ -23,4 +29,10 @@ module.exports = function(app) {
     res.redirect("/");
   });
 
+  // todo routes
+  app.post("/todos", requireLogin, TodoController.createTodo);
+  app.get("/todos", requireLogin, TodoController.getTodos);
+  app.get("/todos/:id", requireLogin, TodoController.getTodoById);
+  app.delete("/todos/:id", requireLogin, TodoController.deleteTodoById);
+  app.patch("/todos/:id", requireLogin, TodoController.editTodoById);
 };

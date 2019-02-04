@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // set a model for todos
-let Todo = mongoose.model('Todo', {
+const Todo = mongoose.model('Todo', {
   text: {
     type: String,
     required: true, // validators
@@ -17,7 +17,8 @@ let Todo = mongoose.model('Todo', {
     default: null,
   },
   dueDate: {
-    type: Date,
+    type: Number,
+    default: null,
   },
   _creator: {
     type: mongoose.Schema.Types.ObjectId, // go into mongoose schema to access the OBjectId data type
