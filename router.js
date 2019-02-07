@@ -30,9 +30,10 @@ module.exports = function(app) {
   });
 
   // todo routes
-  app.post("/todos", requireLogin, TodoController.createTodo);
-  app.get("/todos", requireLogin, TodoController.getTodos);
-  app.get("/todos/:id", requireLogin, TodoController.getTodoById);
-  app.delete("/todos/:id", requireLogin, TodoController.deleteTodoById);
-  app.patch("/todos/:id", requireLogin, TodoController.editTodoById);
+  app.post("/api/todos", requireLogin, TodoController.createTodo);
+  app.get("/api/todos", requireLogin, TodoController.getTodos);
+  app.get("/api/todos/filter/:category", requireLogin, TodoController.getTodosByCategory)
+  app.get("/api/todos/:id", requireLogin, TodoController.getTodoById);
+  app.delete("/api/todos/:id", requireLogin, TodoController.deleteTodoById);
+  app.patch("/api/todos/:id", requireLogin, TodoController.editTodoById);
 };

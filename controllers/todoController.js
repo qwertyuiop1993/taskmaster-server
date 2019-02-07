@@ -4,10 +4,12 @@ const _ = require("lodash");
 
 module.exports.createTodo = async (req, res, next) => {
   try {
+    console.log(req.body)
     const todo = await new Todo({
       // create new todo instance to save to database
       text: req.body.text,
       dueDate: req.body.dueDate || null,
+      category: req.body.category,
       _creator: req.user._id // get user id and set it as creator on the newly created todo
     }).save();
     res.send(todo);
@@ -24,6 +26,19 @@ module.exports.getTodos = async (req, res, next) => {
     res.send({ todos });
   } catch (err) {
     res.status(400).send(err);
+  }
+};
+
+module.exports.getTodosByCategory = async (req, res, next) => {
+  try {
+    const { category } = req.params;
+    const todos = await Todo.find({
+      _creator: req.user._id,
+      category: category,
+    });
+    res.send({ todos });
+  } catch (err) {
+    res.status(400).send(err)
   }
 };
 

@@ -42,10 +42,10 @@ describe("GET /api/current_user", () => {
   });
 });
 // Todo tests
-describe("GET /todos", () => {
+describe("GET /api/todos", () => {
   it("should fetch a user's todos if user is logged in", (done) => {
     server
-      .get("/todos")
+      .get("/api/todos")
       .expect(200)
       .expect((res) => {
         expect(res.body["todos"].length).toEqual(1); // there should be one todo
@@ -55,16 +55,16 @@ describe("GET /todos", () => {
 
   it("should return unauthorized if user is not logged in", (done) => {
     request(app) // don't use agent if simulating requests without login
-      .get("/todos")
+      .get("/api/todos")
       .expect(401)
       .end(done);
   });
 });
 
-describe("GET /todos/:id", () => {
+describe("GET /api/todos/:id", () => {
   it("should fetch a specific todo if user is logged in", (done) => {
     server
-      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .get(`/api/todos/${todos[0]._id.toHexString()}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.todo.text).toBe(todos[0].text);
@@ -75,31 +75,31 @@ describe("GET /todos/:id", () => {
   it("should return 404 if todo not found", (done) => {
     let hexId = new ObjectID().toHexString();
     server
-      .get(`/todos/${hexId}`) // get a new objectID that is not in the collection of todos
+      .get(`/api/todos/${hexId}`) // get a new objectID that is not in the collection of todos
       .expect(404)
       .end(done);
   });
 
   it("should return 404 for non-object ids", (done) => {
     server
-      .get(`/todos/123`)
+      .get(`/api/todos/123`)
       .expect(404)
       .end(done);
   });
 
   it("should not return todo doc created by other user", (done) => {
     request(app)
-      .get(`/todos/${todos[1]._id.toHexString()}`) // get second todo item (by user two_)
+      .get(`/api/todos/${todos[1]._id.toHexString()}`) // get second todo item (by user two_)
       .expect(401)
       .end(done);
   });
 });
 
-describe("POST /todos", () => {
+describe("POST /api/todos", () => {
   it("should add a todo to the database", (done) => {
     const text = "This is a test";
     server
-      .post("/todos")
+      .post("/api/todos")
       .send({ text: text })
       .expect(200)
       .expect((res) => {
@@ -121,7 +121,7 @@ describe("POST /todos", () => {
 
   it("should not create todo with invalid body data", (done) => {
     server
-      .post("/todos")
+      .post("/api/todos")
       .send({})
       .expect(400)
       .end((err, res) => {
@@ -140,19 +140,19 @@ describe("POST /todos", () => {
 
   it("should return unauthorized if user is not logged in", (done) => {
     request(app)
-      .post("/todos")
+      .post("/api/todos")
       .send({ text: "This is a test" })
       .expect(401)
       .end(done);
   });
 });
 
-describe("DELETE /todos/:id", () => {
+describe("DELETE /api/todos/:id", () => {
   it("should return deleted todo", (done) => {
     const hexId = todos[0]._id.toHexString();
 
     server
-      .delete(`/todos/${hexId}`)
+      .delete(`/api/todos/${hexId}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.todo._id).toBe(hexId);
@@ -175,7 +175,7 @@ describe("DELETE /todos/:id", () => {
   it("should not remove todo created by another user", (done) => {
     const hexId = todos[1]._id.toHexString(); // try to delete first todo (created by user 1)
     server
-      .delete(`/todos/${hexId}`)
+      .delete(`/api/todos/${hexId}`)
       .expect(404)
       .end((err, res) => {
         // pass a callback into then end method in order to check database
@@ -195,25 +195,25 @@ describe("DELETE /todos/:id", () => {
   it("should return 404 if todo not found", (done) => {
     const hexId = "5bb372f4e029fa56b7b86a29";
     server
-      .delete(`/todos/${hexId}`)
+      .delete(`/api/todos/${hexId}`)
       .expect(404)
       .end(done);
   });
 
   it("should return 404 if object id is invalid", (done) => {
     server
-      .delete("/todos/123")
+      .delete("/api/todos/123")
       .expect(404)
       .end(done);
   });
 });
 
-describe("PATCH /todos/:id", () => {
+describe("PATCH /api/todos/:id", () => {
   it("should update todo", (done) => {
     const hexId = todos[0]._id.toHexString();
     const text = "Updated";
     server
-      .patch(`/todos/${hexId}`)
+      .patch(`/api/todos/${hexId}`)
       .send({
         text: text,
         completed: true
@@ -230,7 +230,7 @@ describe("PATCH /todos/:id", () => {
   it("should clear completedAt when todo is not completed", (done) => {
     const hexId = todos[0]._id.toHexString();
     server
-      .patch(`/todos/${hexId}`)
+      .patch(`/api/todos/${hexId}`)
       .send({ completed: false, text: "Updated" })
       .expect(200)
       .expect((res) => {
@@ -246,7 +246,7 @@ describe("PATCH /todos/:id", () => {
     const text = "Updated";
 
     server
-      .patch(`/todos/${hexId}`)
+      .patch(`/api/todos/${hexId}`)
       .send({
         text: text,
         completed: true
