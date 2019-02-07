@@ -12,6 +12,10 @@ const Todo = mongoose.model('Todo', {
     type: String,
     default: "Inbox"
   },
+  indexInList: {
+    type: Number,
+    default: null
+  },
   completed: {
     type: Boolean,
     default: false,

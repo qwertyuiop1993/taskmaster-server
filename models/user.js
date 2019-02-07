@@ -16,7 +16,8 @@ const userSchema = new Schema({
   },
   name: {
     type: String
-  }
+  },
+  projects: [String]
 });
 
 

@@ -80,7 +80,7 @@ module.exports.deleteTodoById = async (req, res, next) => {
 
 module.exports.editTodoById = async (req, res, next) => {
   const { id } = req.params;
-  const body = _.pick(req.body, ["text", "completed", "dueDate"]);
+  const body = _.pick(req.body, ["text", "completed", "dueDate", "indexInList"]);
 
   if (!ObjectID.isValid(id)) {
     return res.status(404).send("Invalid ID");
