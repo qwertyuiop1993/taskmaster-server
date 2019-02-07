@@ -13,7 +13,7 @@ module.exports = function(app) {
   app.get("/auth/google", requireGoogleLogin);
 
   app.get("/auth/google/callback", requireGoogleLogin, (req, res, next) => {
-    res.send(req.user);
+    res.redirect("/dashboard");
   });
 
   app.get("/auth/mock", requireMockLogin, (req, res, next) => {

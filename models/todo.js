@@ -8,6 +8,10 @@ const Todo = mongoose.model('Todo', {
     minlength: 1,
     trim: true
   },
+  category: {
+    type: String,
+    default: "Inbox"
+  },
   completed: {
     type: Boolean,
     default: false,

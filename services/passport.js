@@ -53,13 +53,14 @@ const googleOptions = {
 const googleLogin = new GoogleStrategy(googleOptions, async (accessToken, refreshToken, profile, done) => {
   const googleID = profile.id;
   const email = profile.emails[0]["value"];
+  const name = profile.displayName;
 
   try {
     const existingUser = await User.findOne({ googleID: googleID });
     if (existingUser) {
       return done(null, existingUser); // if user is found, call done with no error and the user data
     }
-    const newUser = await new User({ email: email, googleID: googleID }).save();
+    const newUser = await new User({ email: email, googleID: googleID, name: name }).save();
     done(null, newUser);
   } catch (err) {
     done(err, false);
