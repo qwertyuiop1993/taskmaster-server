@@ -28,6 +28,7 @@ module.exports = function(app) {
 
   // edit users projects
   app.patch("/api/current_user/addProject", requireLogin, UserController.addProject);
+  app.delete("/api/current_user/deleteProject/:name", requireLogin, UserController.deleteProject);
 
   app.get("/api/logout", (req, res) => {
     req.logout();
