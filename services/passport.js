@@ -23,7 +23,7 @@ passport.deserializeUser(async (id, done) => {
 const mockLogin = new MockStrategy(
   {
     name: "mock",
-    user: { id: users[0]["_id"], email: users[0]["email"], googleID: users[0]["googleID"] }
+    user: users[0]
   },
   async (user, done) => {
     const googleID = user.googleID;

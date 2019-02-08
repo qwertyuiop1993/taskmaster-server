@@ -14,6 +14,7 @@ const { users, populateUsers, todos, populateTodos } = require("./seed/seed.js")
 beforeEach(populateTodos);
 beforeEach(populateUsers);
 
+// sign in with mock passport strategy that returns user 1 from seed as logged in user
 describe("create session", () => {
   it("should create a session", (done) => {
     server
@@ -41,6 +42,7 @@ describe("GET /api/current_user", () => {
       .end(done);
   });
 });
+
 // Todo tests
 describe("GET /api/todos", () => {
   it("should fetch a user's todos if user is logged in", (done) => {
@@ -150,7 +152,6 @@ describe("POST /api/todos", () => {
 describe("DELETE /api/todos/:id", () => {
   it("should return deleted todo", (done) => {
     const hexId = todos[0]._id.toHexString();
-
     server
       .delete(`/api/todos/${hexId}`)
       .expect(200)
@@ -255,6 +256,102 @@ describe("PATCH /api/todos/:id", () => {
       .end(done);
   });
 });
+
+// Project tests
+describe("PATCH /api/current_user/addProject", () => {
+  it("should add a project", (done) => {
+    server
+      .patch("/api/current_user/addProject")
+      .send({ project: "New Project" })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.projects.length).toEqual(3);
+        expect(res.body.projects[2]).toBe("New Project");
+      })
+      .end(done);
+  });
+
+  it("should not allow modifications when not logged in", (done) => {
+    request(app)
+      .patch("/api/current_user/addProject")
+      .send({ project: "New Project" })
+      .expect(401)
+      .end(done);
+  });
+});
+
+describe("DELETE /api/current_user/deleteProject/:name", () => {
+  it("should delete named project from user object", (done) => {
+    server
+      .delete("/api/current_user/deleteProject/Misc")
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.projects.length).toEqual(1);
+        expect(res.body.projects[0]).toBe("Work"); // expect remaining project not to be the deleted one
+      })
+      .end(done);
+  });
+
+  it("should delete todos associated with the project from the db", (done) => {
+    server
+      .delete("/api/current_user/deleteProject/Misc")
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        Todo.find({ _creator: users[0]._id, category: "Misc" })
+          .then((todos) => {
+            expect(todos.length).toEqual(0);
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+
+  it("should not delete named project from user object of other users", (done) => {
+    server // logged in as user 1
+      .delete("/api/current_user/deleteProject/Misc")
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findOne({ _id: users[1]._id })
+          .then((user) => {
+            expect(user.projects[0]).toBe("Misc"); // user 2 should still have Misc project
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+
+  it("should not delete todos of other users with the same project name", (done) => {
+    server // logged in as user 1
+      .delete("/api/current_user/deleteProject/Misc")
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        // user 2 should still have todos associated with Misc
+        Todo.find({ _creator: users[1]._id, category: "Misc" }).then((todos) => {
+          expect(todos.length).toEqual(1);
+          done();
+        });
+      });
+  });
+
+  it("should not let users who are not logged in manipulate projects", (done) => {
+    request(app) // not logged in
+      .delete("/api/current_user/deleteProject/Misc")
+      .expect(401)
+      .end(done);
+  });
+});
+
+//logout
 
 describe("GET /api/logout", () => {
   it("should log user out", (done) => {

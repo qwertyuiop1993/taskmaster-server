@@ -11,12 +11,14 @@ const users = [
   {
     _id: userOneId,
     email: "test@example.com",
-    googleID: "5c5857600e4ce674c3a997d3"
+    googleID: "5c5857600e4ce674c3a997d3",
+    projects: ["Misc", "Work"]
   },
   {
     _id: userTwoId,
     email: "david@ens-lyon.fr",
-    googleID: "384758852393837635"
+    googleID: "384758852393837635",
+    projects: ["Misc", "Holidays"]
   }
 ];
 
@@ -24,11 +26,13 @@ const todos = [
   {
     _id: new ObjectID(),
     text: "First test todo",
+    category: "Misc",
     _creator: userOneId
   },
   {
     _id: new ObjectID(),
     text: "Second test todo",
+    category: "Misc",
     completed: true,
     completedAt: new Date().getTime(),
     _creator: userTwoId
