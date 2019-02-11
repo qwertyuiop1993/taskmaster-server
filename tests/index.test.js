@@ -257,6 +257,20 @@ describe("PATCH /api/todos/:id", () => {
   });
 });
 
+describe("GET /api/todos/count", () => {
+  it("should return a count of all the todos in each project", (done) => {
+    server
+      .get("/api/todos/count")
+      .expect(200)
+      .expect(res => {
+        expect(res.body.Misc).toEqual(1);
+        expect(res.body.Inbox).toEqual(0);
+        expect(res.body.Work).toEqual(0);
+      })
+      .end(done);
+  });
+});
+
 // Project tests
 describe("PATCH /api/current_user/addProject", () => {
   it("should add a project", (done) => {

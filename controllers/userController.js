@@ -59,7 +59,6 @@ module.exports.editProjectName = async (req, res, next) => {
   const projectToEdit = req.params.name;
   const newName = req.body.newName;
 
-  console.log(newName);
   // update todos to be associated with new name
   const updatedTodos = await Todo.update(
     { _creator: req.user._id, category: projectToEdit },
