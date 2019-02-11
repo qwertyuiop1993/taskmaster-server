@@ -29,7 +29,7 @@ module.exports.deleteProject = async (req, res, next) => {
   const deletedTodos = await Todo.deleteMany({
     _creator: req.user._id,
     category: projectToDelete,
-  })
+  });
 
   if(!deletedTodos) {
     return res.status(404).send();
@@ -51,5 +51,42 @@ module.exports.deleteProject = async (req, res, next) => {
     return res.status(404).send();
   }
 
+  res.status(200).send(updatedUser);
+};
+
+module.exports.editProjectName = async (req, res, next) => {
+
+  const projectToEdit = req.params.name;
+  const newName = req.body.newName;
+
+  console.log(newName);
+  // update todos to be associated with new name
+  const updatedTodos = await Todo.update(
+    { _creator: req.user._id, category: projectToEdit },
+    { $set: { category: newName } },
+    { new: true }
+  );
+
+  if(!updatedTodos) {
+    return res.status(404).send();
+  }
+  // update user to have new name in projects array
+
+  const newProjectsArray = req.user.projects.map(project => {
+    if(project === projectToEdit) {
+      return newName;
+    }
+    return project;
+  });
+
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: req.user._id },
+    { $set: { projects: newProjectsArray } },
+    { new: true }
+  )
+  // send the updated user back
+  if (!updatedUser) {
+    return res.status(404).send();
+  }
   res.status(200).send(updatedUser);
 };

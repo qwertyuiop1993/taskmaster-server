@@ -38,11 +38,11 @@ router(app); // call our router with app
 
 // if (process.env.NODE_ENV === "production") {
 //   // Express will serve up production assets like main.js or main.css
-//   app.use(express.static("emaily-client/build"));
+//   app.use(express.static("taskmaster/build"));
 //   // Express will serve up the index.html file if it doesn't recognise the route
 //   const path = require("path");
 //   app.get("*", (req, res) => {
-//     res.sendFile(path.resolve(__dirname, "emaily-client", "build", "index.html"));
+//     res.sendFile(path.resolve(__dirname, "taskmaster-client", "build", "index.html"));
 //   });
 // }
 

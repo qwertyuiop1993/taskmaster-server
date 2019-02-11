@@ -28,8 +28,8 @@ module.exports = function(app) {
 
   // edit users projects
   app.patch("/api/current_user/addProject", requireLogin, UserController.addProject);
+  app.patch("/api/current_user/editProjectName/:name", requireLogin, UserController.editProjectName)
   app.delete("/api/current_user/deleteProject/:name", requireLogin, UserController.deleteProject);
-
   app.get("/api/logout", (req, res) => {
     req.logout();
     res.redirect("/");
