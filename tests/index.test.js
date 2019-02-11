@@ -351,6 +351,41 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
   });
 });
 
+describe("PATCH /api/current_user/editProjectName/:name", () => {
+  it("should change project name in user's projects array", (done) => {
+    server
+      .patch("/api/current_user/editProjectName/Misc")
+      .send({ newName: "ENS" })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.projects[0]).toBe("ENS");
+      })
+      .end((err, res) => {
+        User.findOne({ _id: users[0]._id })
+          .then((user) => {
+            expect(user.projects[0]).toBe("ENS");
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+
+  it("should change category of associated todos to the new name", (done) => {
+    server
+      .patch("/api/current_user/editProjectName/Misc")
+      .send({ newName: "ENS" })
+      .expect(200)
+      .end((err, res) => {
+        Todo.find({ _creator: users[0]._id, category: "ENS" })
+          .then((todo) => {
+            expect(todo[0].text).toBe("First test todo");
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+});
+
 //logout
 
 describe("GET /api/logout", () => {
