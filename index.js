@@ -23,7 +23,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(morgan("combined")); // logging framework
+// app.use(morgan("combined")); // logging framework
 app.use(
   cors({
     origin: "http://localhost:3000",

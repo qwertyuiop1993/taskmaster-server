@@ -4,7 +4,6 @@ const _ = require("lodash");
 
 module.exports.createTodo = async (req, res, next) => {
   try {
-    console.log(req.body)
     const todo = await new Todo({
       // create new todo instance to save to database
       text: req.body.text,
@@ -24,6 +23,25 @@ module.exports.getTodos = async (req, res, next) => {
       _creator: req.user._id // find all the todos created by the user
     });
     res.send({ todos });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
+module.exports.getTodoCount = async (req, res, next) => {
+  try {
+    const todos = await Todo.find({
+      _creator: req.user._id
+    });
+
+    const count = {};
+    const projects = [ "Inbox", ...req.user.projects];
+    // set the count for each project at 0 to start with
+    projects.forEach(project => count[project] = 0);
+    todos.forEach(todo => {
+      count[todo.category]++;
+    });
+    res.send(count);
   } catch (err) {
     res.status(400).send(err);
   }

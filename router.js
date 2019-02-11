@@ -39,6 +39,7 @@ module.exports = function(app) {
   // todo routes
   app.post("/api/todos", requireLogin, TodoController.createTodo);
   app.get("/api/todos", requireLogin, TodoController.getTodos);
+  app.get("/api/todos/count", requireLogin, TodoController.getTodoCount);
   app.get("/api/todos/filter/:category", requireLogin, TodoController.getTodosByCategory);
   app.get("/api/todos/:id", requireLogin, TodoController.getTodoById);
   app.delete("/api/todos/:id", requireLogin, TodoController.deleteTodoById);
