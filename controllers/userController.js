@@ -2,11 +2,12 @@ const { ObjectID } = require("mongodb");
 const _ = require("lodash");
 
 const User = require("../models/user");
+const { arrayMove } = require("../services/arrayMove");
 const { Todo } = require("../models/todo");
 
 module.exports.addProject = async (req, res, next) => {
   const body = _.pick(req.body, ["project"]);
-  const newProjectsArray = [...req.user.projects, body.project];
+  const newProjectsArray = [ body.project, ...req.user.projects ];
 
   const updatedUser = await User.findOneAndUpdate(
     {
@@ -47,6 +48,25 @@ module.exports.deleteProject = async (req, res, next) => {
     { $set: { projects: newProjectsArray } },
     { new: true }
   );
+  if (!updatedUser) {
+    return res.status(404).send();
+  }
+
+  res.status(200).send(updatedUser);
+};
+
+module.exports.updateProjectOrder = async (req, res, next) => {
+  const { oldIndex, newIndex } = req.body;
+  const updatedProjects = arrayMove(req.user.projects, oldIndex, newIndex);
+
+  const updatedUser = await User.findOneAndUpdate(
+    {
+      _id: req.user._id
+    },
+    { $set: { projects: updatedProjects } },
+    { new: true }
+  );
+
   if (!updatedUser) {
     return res.status(404).send();
   }
