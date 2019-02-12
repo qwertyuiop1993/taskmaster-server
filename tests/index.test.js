@@ -262,7 +262,7 @@ describe("GET /api/todos/count", () => {
     server
       .get("/api/todos/count")
       .expect(200)
-      .expect(res => {
+      .expect((res) => {
         expect(res.body.Misc).toEqual(1);
         expect(res.body.Inbox).toEqual(0);
         expect(res.body.Work).toEqual(0);
@@ -280,7 +280,7 @@ describe("PATCH /api/current_user/addProject", () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.projects.length).toEqual(3);
-        expect(res.body.projects[2]).toBe("New Project");
+        expect(res.body.projects[0]).toBe("New Project");
       })
       .end(done);
   });
@@ -393,6 +393,28 @@ describe("PATCH /api/current_user/editProjectName/:name", () => {
         Todo.find({ _creator: users[0]._id, category: "ENS" })
           .then((todo) => {
             expect(todo[0].text).toBe("First test todo");
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+});
+
+describe("PATCH /api/current_user/updateProjectOrder", () => {
+  it("should change the order of the user's projects array", (done) => {
+    server
+      .patch("/api/current_user/updateProjectOrder")
+      .send({ oldIndex: 0, newIndex: 1 })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.projects[0]).toBe("Work");
+        expect(res.body.projects[1]).toBe("Misc");
+      })
+      .end((err, res) => {
+        User.findOne({ _id: users[0]._id })
+          .then((user) => {
+            expect(user.projects[0]).toBe("Work");
+            expect(user.projects[1]).toBe("Misc");
             done();
           })
           .catch((err) => done(err));
