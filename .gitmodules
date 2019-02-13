@@ -1,3 +1,6 @@
 [submodule "emaily-client"]
 	path = emaily-client
 	url = https://github.com/qwertyuiop1993/emaily-client
+[submodule "taskmaster-client"]
+	path = taskmaster-client
+	url = https://github.com/qwertyuiop1993/taskmaster-client
