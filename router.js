@@ -5,8 +5,11 @@ const TodoController = require("./controllers/todoController");
 
 // middlewares
 const requireGoogleLogin = passport.authenticate("google", { scope: ["profile", "email"] });
-const requireMockLogin = passport.authenticate("mock");
 
+let requireMockLogin;
+if(process.env.NODE_ENV === "test") {
+  requireMockLogin = passport.authenticate("mock");
+}
 
 const requireLogin = require("./middlewares/requireLogin");
 
@@ -18,9 +21,11 @@ module.exports = function(app) {
     res.redirect("/dashboard");
   });
 
-  app.get("/auth/mock", requireMockLogin, (req, res, next) => {
-    res.send(req.user);
-  });
+  if(process.env.NODE_ENV === "test") {
+    app.get("/auth/mock", requireMockLogin, (req, res, next) => {
+      res.send(req.user);
+    });
+  }
 
   app.get("/api/current_user", requireLogin, (req, res) => {
     res.send(req.user);
