@@ -23,7 +23,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use(morgan("combined")); // logging framework
+app.use(morgan("combined")); // logging framework
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -36,7 +36,7 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false }); // parse re
 
 router(app); // call our router with app
 
-if (process.env.NODE_ENV !== "test" && process.env.NODE_ENV !== "development") {
+if (process.env.NODE_ENV === "production") {
   // Express will serve up production assets like main.js or main.css
   app.use(express.static("taskmaster-client/build"));
   // Express will serve up the index.html file if it doesn't recognise the route
