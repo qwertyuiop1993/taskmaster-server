@@ -276,11 +276,11 @@ describe("PATCH /api/current_user/addProject", () => {
   it("should add a project", (done) => {
     server
       .patch("/api/current_user/addProject")
-      .send({ project: "New Project" })
+      .send({ projectName: "New Project" })
       .expect(200)
       .expect((res) => {
         expect(res.body.projects.length).toEqual(3);
-        expect(res.body.projects[0]).toBe("New Project");
+        expect(res.body.projects[0].name).toBe("New Project");
       })
       .end(done);
   });
@@ -301,7 +301,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.projects.length).toEqual(1);
-        expect(res.body.projects[0]).toBe("Work"); // expect remaining project not to be the deleted one
+        expect(res.body.projects[0].name).toBe("Work"); // expect remaining project not to be the deleted one
       })
       .end(done);
   });
@@ -334,7 +334,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
         User.findOne({ _id: users[1]._id })
           .then((user) => {
-            expect(user.projects[0]).toBe("Misc"); // user 2 should still have Misc project
+            expect(user.projects[0].name).toBe("Misc"); // user 2 should still have Misc project
             done();
           })
           .catch((err) => done(err));
@@ -372,12 +372,12 @@ describe("PATCH /api/current_user/editProjectName/:name", () => {
       .send({ newName: "ENS" })
       .expect(200)
       .expect((res) => {
-        expect(res.body.projects[0]).toBe("ENS");
+        expect(res.body.projects[0].name).toBe("ENS");
       })
       .end((err, res) => {
         User.findOne({ _id: users[0]._id })
           .then((user) => {
-            expect(user.projects[0]).toBe("ENS");
+            expect(user.projects[0].name).toBe("ENS");
             done();
           })
           .catch((err) => done(err));
@@ -407,14 +407,14 @@ describe("PATCH /api/current_user/updateProjectOrder", () => {
       .send({ oldIndex: 0, newIndex: 1 })
       .expect(200)
       .expect((res) => {
-        expect(res.body.projects[0]).toBe("Work");
-        expect(res.body.projects[1]).toBe("Misc");
+        expect(res.body.projects[0].name).toBe("Work");
+        expect(res.body.projects[1].name).toBe("Misc");
       })
       .end((err, res) => {
         User.findOne({ _id: users[0]._id })
           .then((user) => {
-            expect(user.projects[0]).toBe("Work");
-            expect(user.projects[1]).toBe("Misc");
+            expect(user.projects[0].name).toBe("Work");
+            expect(user.projects[1].name).toBe("Misc");
             done();
           })
           .catch((err) => done(err));

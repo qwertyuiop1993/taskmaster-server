@@ -6,19 +6,30 @@ const { Todo } = require("../../models/todo");
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
 
+const projectOneId = new ObjectID();
+const projectTwoId = new ObjectID();
+const projectThreeId = new ObjectID();
+const projectFourId = new ObjectID();
+
 // create an array of users
 const users = [
   {
     _id: userOneId,
     email: "test@example.com",
     googleID: "5c5857600e4ce674c3a997d3",
-    projects: ["Misc", "Work"]
+    projects: [
+      { _id: projectOneId, name: "Misc", color: "teal", image: null },
+      { _id: projectTwoId, name: "Work", color: "red", image: null }
+    ]
   },
   {
     _id: userTwoId,
     email: "david@ens-lyon.fr",
     googleID: "384758852393837635",
-    projects: ["Misc", "Holidays"]
+    projects: [
+      { _id: projectThreeId, name: "Misc", color: "black", image: null },
+      { _id: projectFourId, name: "Holidays", color: "grey", image: null }
+    ]
   }
 ];
 

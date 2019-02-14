@@ -35,9 +35,9 @@ module.exports.getTodoCount = async (req, res, next) => {
     });
 
     const count = {};
-    const projects = [ "Inbox", ...req.user.projects];
+    const projects = [ { name: "Inbox" }, ...req.user.projects];
     // set the count for each project at 0 to start with
-    projects.forEach(project => count[project] = 0);
+    projects.forEach(project => count[project.name] = 0);
     todos.forEach(todo => {
       count[todo.category]++;
     });

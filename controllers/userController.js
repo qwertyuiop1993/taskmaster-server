@@ -6,8 +6,9 @@ const { arrayMove } = require("../services/arrayMove");
 const { Todo } = require("../models/todo");
 
 module.exports.addProject = async (req, res, next) => {
-  const body = _.pick(req.body, ["project"]);
-  const newProjectsArray = [ body.project, ...req.user.projects ];
+  const body = _.pick(req.body, ["projectName"]);
+  const newProject = { name: body.projectName, color: "teal", image: null };
+  const newProjectsArray = [ newProject, ...req.user.projects ];
 
   const updatedUser = await User.findOneAndUpdate(
     {
@@ -38,7 +39,7 @@ module.exports.deleteProject = async (req, res, next) => {
 
   // filter out the project to delete from the new projects array
   const newProjectsArray = req.user.projects.filter((project) => {
-    return project !== projectToDelete;
+    return project.name !== projectToDelete;
   });
 
   const updatedUser = await User.findOneAndUpdate(
@@ -92,8 +93,8 @@ module.exports.editProjectName = async (req, res, next) => {
   // update user to have new name in projects array
 
   const newProjectsArray = req.user.projects.map(project => {
-    if(project === projectToEdit) {
-      return newName;
+    if(project.name === projectToEdit) {
+      return { ...project, name: newName };
     }
     return project;
   });
