@@ -75,6 +75,28 @@ module.exports.updateProjectOrder = async (req, res, next) => {
   res.status(200).send(updatedUser);
 };
 
+
+module.exports.editProjectColor = async (req, res, next) => {
+  const projectId = req.params.id;
+  const newColor = req.body.newColor;
+
+  console.log(req.user.projects)
+
+  const updatedUser = await User.findOneAndUpdate(
+    {
+      _id: req.user._id,
+      "projects._id": projectId
+    },
+    { $set: { "projects.$.color": newColor } },
+    { new: true }
+  );
+
+  if (!updatedUser) {
+    return res.status(404).send();
+  }
+  res.status(200).send(updatedUser);
+};
+
 module.exports.editProjectName = async (req, res, next) => {
 
   const projectToEdit = req.params.name;
