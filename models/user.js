@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const jwt = require("jwt-simple");
-const ProjectListSchema = require("./projectList");
+const ProjectSchema = require("./project");
 
 // Define model
 const userSchema = new Schema({
@@ -18,7 +18,7 @@ const userSchema = new Schema({
   name: {
     type: String
   },
-  projects: [ProjectListSchema]
+  projects: [ProjectSchema]
 });
 
 

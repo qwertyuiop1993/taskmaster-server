@@ -50,7 +50,7 @@ describe("GET /api/todos", () => {
       .get("/api/todos")
       .expect(200)
       .expect((res) => {
-        expect(res.body["todos"].length).toEqual(1); // there should be one todo
+        expect(res.body["todos"].length).toEqual(2); // there should be two todos
       })
       .end(done);
   });
@@ -133,7 +133,7 @@ describe("POST /api/todos", () => {
 
         Todo.find()
           .then((todos) => {
-            expect(todos.length).toBe(2);
+            expect(todos.length).toBe(3);
             done();
           })
           .catch((e) => done(e));
@@ -174,7 +174,7 @@ describe("DELETE /api/todos/:id", () => {
   });
 
   it("should not remove todo created by another user", (done) => {
-    const hexId = todos[1]._id.toHexString(); // try to delete first todo (created by user 1)
+    const hexId = todos[2]._id.toHexString(); // try to delete third todo (created by user 2)
     server
       .delete(`/api/todos/${hexId}`)
       .expect(404)
@@ -243,7 +243,7 @@ describe("PATCH /api/todos/:id", () => {
   });
 
   it("should not update todo if todo id does not belong to current user", (done) => {
-    const hexId = todos[1]._id.toHexString();
+    const hexId = todos[2]._id.toHexString();
     const text = "Updated";
 
     server
@@ -263,7 +263,7 @@ describe("GET /api/todos/count", () => {
       .get("/api/todos/count")
       .expect(200)
       .expect((res) => {
-        expect(res.body.Misc).toEqual(1);
+        expect(res.body.Misc).toEqual(2);
         expect(res.body.Inbox).toEqual(0);
         expect(res.body.Work).toEqual(0);
       })
@@ -365,10 +365,10 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
   });
 });
 
-describe("PATCH /api/current_user/editProjectName/:name", () => {
+describe("PATCH /api/current_user/editProjectName/:id", () => {
   it("should change project name in user's projects array", (done) => {
     server
-      .patch("/api/current_user/editProjectName/Misc")
+      .patch(`/api/current_user/editProjectName/${users[0].projects[0]._id}`)
       .send({ newName: "ENS" })
       .expect(200)
       .expect((res) => {
@@ -386,13 +386,14 @@ describe("PATCH /api/current_user/editProjectName/:name", () => {
 
   it("should change category of associated todos to the new name", (done) => {
     server
-      .patch("/api/current_user/editProjectName/Misc")
-      .send({ newName: "ENS" })
+      .patch(`/api/current_user/editProjectName/${users[0].projects[0]._id}`)
+      .send({ oldName: "Misc", newName: "ENS" })
       .expect(200)
       .end((err, res) => {
         Todo.find({ _creator: users[0]._id, category: "ENS" })
-          .then((todo) => {
-            expect(todo[0].text).toBe("First test todo");
+          .then((todos) => {
+            expect(todos[0].text).toBe("First test todo");
+            expect(todos[1].text).toBe("Second test todo");
             done();
           })
           .catch((err) => done(err));
@@ -404,7 +405,7 @@ describe("PATCH /api/current_user/editProjectColor/:id", () => {
   it("should change the associated color of the project in user object", (done) => {
     server
       .patch(`/api/current_user/editProjectColor/${users[0].projects[0]._id}`)
-      .send({ newColor: "red" })
+      .send({ color: "red" })
       .expect(200)
       .expect((res) => {
         expect(res.body.projects[0].color).toBe("red");

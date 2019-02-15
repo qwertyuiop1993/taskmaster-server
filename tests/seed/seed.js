@@ -44,6 +44,12 @@ const todos = [
     _id: new ObjectID(),
     text: "Second test todo",
     category: "Misc",
+    _creator: userOneId
+  },
+  {
+    _id: new ObjectID(),
+    text: "Third test todo",
+    category: "Misc",
     completed: true,
     completedAt: new Date().getTime(),
     _creator: userTwoId

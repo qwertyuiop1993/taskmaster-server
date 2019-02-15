@@ -116,12 +116,13 @@ module.exports.editProjectImage = async (req, res, next) => {
 
 module.exports.editProjectName = async (req, res, next) => {
 
-  const projectToEdit = req.params.name;
+  const projectId = req.params.id;
+  const oldName = req.body.oldName;
   const newName = req.body.newName;
 
   // update todos to be associated with new name
-  const updatedTodos = await Todo.update(
-    { _creator: req.user._id, category: projectToEdit },
+  const updatedTodos = await Todo.updateMany(
+    { _creator: req.user._id, category: oldName },
     { $set: { category: newName } },
     { new: true }
   );
@@ -131,21 +132,19 @@ module.exports.editProjectName = async (req, res, next) => {
   }
   // update user to have new name in projects array
 
-  const newProjectsArray = req.user.projects.map(project => {
-    if(project.name === projectToEdit) {
-      return { ...project, name: newName };
-    }
-    return project;
-  });
-
   const updatedUser = await User.findOneAndUpdate(
-    { _id: req.user._id },
-    { $set: { projects: newProjectsArray } },
+    {
+      _id: req.user._id,
+      "projects._id": projectId
+    },
+    { $set: { "projects.$.name": newName } },
     { new: true }
-  )
-  // send the updated user back
+  );
+
   if (!updatedUser) {
     return res.status(404).send();
   }
+
   res.status(200).send(updatedUser);
+
 };

@@ -33,7 +33,7 @@ module.exports = function(app) {
 
   // edit users projects
   app.patch("/api/current_user/addProject", requireLogin, UserController.addProject);
-  app.patch("/api/current_user/editProjectName/:name", requireLogin, UserController.editProjectName);
+  app.patch("/api/current_user/editProjectName/:id", requireLogin, UserController.editProjectName);
   app.patch("/api/current_user/editProjectColor/:id", requireLogin, UserController.editProjectColor);
   app.patch("/api/current_user/editProjectImage/:id", requireLogin, UserController.editProjectImage);
   app.patch("/api/current_user/updateProjectOrder", requireLogin, UserController.updateProjectOrder);
