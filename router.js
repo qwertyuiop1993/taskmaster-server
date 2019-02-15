@@ -35,6 +35,7 @@ module.exports = function(app) {
   app.patch("/api/current_user/addProject", requireLogin, UserController.addProject);
   app.patch("/api/current_user/editProjectName/:name", requireLogin, UserController.editProjectName);
   app.patch("/api/current_user/editProjectColor/:id", requireLogin, UserController.editProjectColor);
+  app.patch("/api/current_user/editProjectImage/:id", requireLogin, UserController.editProjectImage);
   app.patch("/api/current_user/updateProjectOrder", requireLogin, UserController.updateProjectOrder);
   app.delete("/api/current_user/deleteProject/:name", requireLogin, UserController.deleteProject);
 
