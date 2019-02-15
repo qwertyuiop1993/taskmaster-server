@@ -400,6 +400,26 @@ describe("PATCH /api/current_user/editProjectName/:name", () => {
   });
 });
 
+describe("PATCH /api/current_user/editProjectColor/:id", () => {
+  it("should change the associated color of the project in user object", (done) => {
+    server
+      .patch(`/api/current_user/editProjectColor/${users[0].projects[0]._id}`)
+      .send({ newColor: "red" })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.projects[0].color).toBe("red");
+      })
+      .end((err, res) => {
+        User.findOne({ _id: users[0]._id })
+          .then((user) => {
+            expect(user.projects[0].color).toBe("red");
+            done();
+          })
+          .catch((err) => done(err));
+      });
+  });
+});
+
 describe("PATCH /api/current_user/updateProjectOrder", () => {
   it("should change the order of the user's projects array", (done) => {
     server

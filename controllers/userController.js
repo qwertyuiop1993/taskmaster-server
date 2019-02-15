@@ -80,8 +80,6 @@ module.exports.editProjectColor = async (req, res, next) => {
   const projectId = req.params.id;
   const newColor = req.body.newColor;
 
-  console.log(req.user.projects)
-
   const updatedUser = await User.findOneAndUpdate(
     {
       _id: req.user._id,
