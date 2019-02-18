@@ -271,6 +271,53 @@ describe("GET /api/todos/count", () => {
   });
 });
 
+describe("PATCH /api/todos/updateProject/:id", () => {
+  it("should change the relevant todo's project and give it an indexInList of 0", (done) => {
+    server
+      .patch(`/api/todos/updateProject/${todos[0]._id}`)
+      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .expect(200)
+      .end((err, res) => {
+        Todo.findOne({ _id: todos[0]._id }).then((todo) => {
+          expect(todo.category).toBe("Work");
+          expect(todo.indexInList).toEqual(0);
+          done();
+        });
+      });
+  });
+
+  it("should add the todo to the new project and change the indexes appropriately", (done) => {
+    server
+      .patch(`/api/todos/updateProject/${todos[0]._id}`)
+      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .expect(200)
+      .end((err, res) => {
+        Todo.find({ _creator: users[0]._id , category: "Work" }).then(todos => {
+          expect(todos.length).toEqual(1);
+          expect(todos[0].text).toBe("First test todo");
+          done();
+        })
+      })
+  })
+
+  it("should remove the todo from the old project and change the indexes appropriately", (done) => {
+    server
+      .patch(`/api/todos/updateProject/${todos[0]._id}`)
+      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .expect(200)
+      .end((err, res) => {
+        Todo.find({ _creator: users[0]._id , category: "Misc" }).then(todos => {
+          expect(todos.length).toEqual(1);
+          expect(todos[0].text).toBe("Second test todo");
+          done();
+        })
+      })
+  });
+
+
+
+});
+
 // Project tests
 describe("PATCH /api/current_user/addProject", () => {
   it("should add a project", (done) => {
