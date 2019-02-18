@@ -53,4 +53,5 @@ module.exports = function(app) {
   app.get("/api/todos/:id", requireLogin, TodoController.getTodoById);
   app.delete("/api/todos/:id", requireLogin, TodoController.deleteTodoById);
   app.patch("/api/todos/:id", requireLogin, TodoController.editTodoById);
+  app.patch("/api/todos/updateProject/:id", requireLogin, TodoController.updateTodoProject)
 };
