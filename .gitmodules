@@ -1,0 +1,3 @@
+[submodule "taskmaster-client"]
+	path = taskmaster-client
+	url = https://github.com/qwertyuiop1993/taskmaster-client
