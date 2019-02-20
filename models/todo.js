@@ -25,7 +25,7 @@ const Todo = mongoose.model('Todo', {
     default: null,
   },
   dueDate: {
-    type: Number,
+    type: String,
     default: null,
   },
   _creator: {
