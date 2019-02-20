@@ -28,6 +28,18 @@ module.exports.getTodos = async (req, res, next) => {
   }
 };
 
+module.exports.getTodosByDueDate = async (req, res, next) => {
+  try {
+    const todos = await Todo.find({
+      _creator: req.user._id, // find all the todos created by the user
+      dueDate: { $ne: null }
+    });
+    res.send({ todos });
+  } catch (err) {
+    res.status(400).send(err);
+  }
+};
+
 module.exports.getTodoCount = async (req, res, next) => {
   try {
     const todos = await Todo.find({
@@ -41,6 +53,14 @@ module.exports.getTodoCount = async (req, res, next) => {
     todos.forEach((todo) => {
       count[todo.category]++;
     });
+
+    const todosWithDueDate = await Todo.find({
+      _creator: req.user._id, // find all the todos created by the user
+      dueDate: { $ne: null }
+    });
+
+    count["Agenda"] = todosWithDueDate.length;
+
     res.send(count);
   } catch (err) {
     res.status(400).send(err);
