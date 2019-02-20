@@ -210,7 +210,7 @@ describe("DELETE /api/todos/:id", () => {
 });
 
 describe("PATCH /api/todos/:id", () => {
-  it("should update todo", (done) => {
+  it("should update todo text", (done) => {
     const hexId = todos[0]._id.toHexString();
     const text = "Updated";
     server
@@ -224,6 +224,20 @@ describe("PATCH /api/todos/:id", () => {
         expect(res.body.todo.completed).toBe(true);
         expect(res.body.todo.text).toBe("Updated");
         expect(typeof res.body.todo.completedAt).toBe("number");
+      })
+      .end(done);
+  });
+
+  it("should update todo dueDate", (done) => {
+    const hexId = todos[0]._id.toHexString();
+    const dueDate = new Date();
+
+    server
+      .patch(`/api/todos/${hexId}`)
+      .send({ dueDate: dueDate })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.dueDate).toBeTruthy();
       })
       .end(done);
   });
