@@ -7,7 +7,7 @@ const { Todo } = require("../models/todo");
 
 module.exports.addProject = async (req, res, next) => {
   const body = _.pick(req.body, ["projectName"]);
-  const newProject = { name: body.projectName, color: "teal", image: null };
+  const newProject = { name: body.projectName, color: "teal", image: "background6" };
   const newProjectsArray = [ newProject, ...req.user.projects ];
 
   const updatedUser = await User.findOneAndUpdate(
