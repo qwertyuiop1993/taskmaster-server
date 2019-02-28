@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const jwt = require("jwt-simple");
 const ProjectSchema = require("./project");
 
 // Define model
