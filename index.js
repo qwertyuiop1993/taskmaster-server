@@ -54,10 +54,11 @@ mongoose.connect(process.env.MONGODB_URI).catch((err) => {
 
 // Server setup
 const port = process.env.PORT;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Listening to port ${port}`);
 });
 
 module.exports = {
-  app: app
+  app: app,
+  server: server
 };

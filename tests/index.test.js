@@ -1,7 +1,7 @@
 // stuff for testing basic routing
 const request = require("supertest");
-const { app } = require("./../index.js");
-const server = request.agent(app); // set up agent for session testing
+const { app, server } = require("./../index.js");
+const agent = request.agent(app); // set up agent for session testing
 
 // stuff for testing database
 const { ObjectID } = require("mongodb");
@@ -17,7 +17,7 @@ beforeEach(populateUsers);
 // sign in with mock passport strategy that returns user 1 from seed as logged in user
 describe("create session", () => {
   it("should create a session", (done) => {
-    server
+    agent
       .get("/auth/mock")
       .expect(200)
       .end(done);
@@ -26,7 +26,7 @@ describe("create session", () => {
 
 describe("GET /api/current_user", () => {
   it("should return current user when logged in", (done) => {
-    server
+    agent
       .get("/api/current_user")
       .expect(200)
       .expect((res) => {
@@ -46,7 +46,7 @@ describe("GET /api/current_user", () => {
 // Todo tests
 describe("GET /api/todos", () => {
   it("should fetch a user's todos if user is logged in", (done) => {
-    server
+    agent
       .get("/api/todos")
       .expect(200)
       .expect((res) => {
@@ -65,7 +65,7 @@ describe("GET /api/todos", () => {
 
 describe("GET /api/todos/:id", () => {
   it("should fetch a specific todo if user is logged in", (done) => {
-    server
+    agent
       .get(`/api/todos/${todos[0]._id.toHexString()}`)
       .expect(200)
       .expect((res) => {
@@ -76,14 +76,14 @@ describe("GET /api/todos/:id", () => {
 
   it("should return 404 if todo not found", (done) => {
     let hexId = new ObjectID().toHexString();
-    server
+    agent
       .get(`/api/todos/${hexId}`) // get a new objectID that is not in the collection of todos
       .expect(404)
       .end(done);
   });
 
   it("should return 404 for non-object ids", (done) => {
-    server
+    agent
       .get(`/api/todos/123`)
       .expect(404)
       .end(done);
@@ -100,7 +100,7 @@ describe("GET /api/todos/:id", () => {
 describe("POST /api/todos", () => {
   it("should add a todo to the database", (done) => {
     const text = "This is a test";
-    server
+    agent
       .post("/api/todos")
       .send({ text: text })
       .expect(200)
@@ -122,7 +122,7 @@ describe("POST /api/todos", () => {
   });
 
   it("should not create todo with invalid body data", (done) => {
-    server
+    agent
       .post("/api/todos")
       .send({})
       .expect(400)
@@ -152,7 +152,7 @@ describe("POST /api/todos", () => {
 describe("DELETE /api/todos/:id", () => {
   it("should return deleted todo", (done) => {
     const hexId = todos[0]._id.toHexString();
-    server
+    agent
       .delete(`/api/todos/${hexId}`)
       .expect(200)
       .expect((res) => {
@@ -175,7 +175,7 @@ describe("DELETE /api/todos/:id", () => {
 
   it("should not remove todo created by another user", (done) => {
     const hexId = todos[2]._id.toHexString(); // try to delete third todo (created by user 2)
-    server
+    agent
       .delete(`/api/todos/${hexId}`)
       .expect(404)
       .end((err, res) => {
@@ -195,14 +195,14 @@ describe("DELETE /api/todos/:id", () => {
 
   it("should return 404 if todo not found", (done) => {
     const hexId = "5bb372f4e029fa56b7b86a29";
-    server
+    agent
       .delete(`/api/todos/${hexId}`)
       .expect(404)
       .end(done);
   });
 
   it("should return 404 if object id is invalid", (done) => {
-    server
+    agent
       .delete("/api/todos/123")
       .expect(404)
       .end(done);
@@ -213,7 +213,7 @@ describe("PATCH /api/todos/:id", () => {
   it("should update todo text", (done) => {
     const hexId = todos[0]._id.toHexString();
     const text = "Updated";
-    server
+    agent
       .patch(`/api/todos/${hexId}`)
       .send({
         text: text,
@@ -232,7 +232,7 @@ describe("PATCH /api/todos/:id", () => {
     const hexId = todos[0]._id.toHexString();
     const dueDate = new Date();
 
-    server
+    agent
       .patch(`/api/todos/${hexId}`)
       .send({ dueDate: dueDate })
       .expect(200)
@@ -244,7 +244,7 @@ describe("PATCH /api/todos/:id", () => {
 
   it("should clear completedAt when todo is not completed", (done) => {
     const hexId = todos[0]._id.toHexString();
-    server
+    agent
       .patch(`/api/todos/${hexId}`)
       .send({ completed: false, text: "Updated" })
       .expect(200)
@@ -260,7 +260,7 @@ describe("PATCH /api/todos/:id", () => {
     const hexId = todos[2]._id.toHexString();
     const text = "Updated";
 
-    server
+    agent
       .patch(`/api/todos/${hexId}`)
       .send({
         text: text,
@@ -273,7 +273,7 @@ describe("PATCH /api/todos/:id", () => {
 
 describe("GET /api/todos/count", () => {
   it("should return a count of all the todos in each project", (done) => {
-    server
+    agent
       .get("/api/todos/count")
       .expect(200)
       .expect((res) => {
@@ -287,7 +287,7 @@ describe("GET /api/todos/count", () => {
 
 describe("PATCH /api/todos/updateProject/:id", () => {
   it("should change the relevant todo's project and give it an indexInList of 0", (done) => {
-    server
+    agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
       .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
       .expect(200)
@@ -301,7 +301,7 @@ describe("PATCH /api/todos/updateProject/:id", () => {
   });
 
   it("should add the todo to the new project and change the indexes appropriately", (done) => {
-    server
+    agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
       .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
       .expect(200)
@@ -315,7 +315,7 @@ describe("PATCH /api/todos/updateProject/:id", () => {
   })
 
   it("should remove the todo from the old project and change the indexes appropriately", (done) => {
-    server
+    agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
       .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
       .expect(200)
@@ -335,7 +335,7 @@ describe("PATCH /api/todos/updateProject/:id", () => {
 // Project tests
 describe("PATCH /api/current_user/addProject", () => {
   it("should add a project", (done) => {
-    server
+    agent
       .patch("/api/current_user/addProject")
       .send({ projectName: "New Project" })
       .expect(200)
@@ -357,7 +357,7 @@ describe("PATCH /api/current_user/addProject", () => {
 
 describe("DELETE /api/current_user/deleteProject/:name", () => {
   it("should delete named project from user object", (done) => {
-    server
+    agent
       .delete("/api/current_user/deleteProject/Misc")
       .expect(200)
       .expect((res) => {
@@ -368,7 +368,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
   });
 
   it("should delete todos associated with the project from the db", (done) => {
-    server
+    agent
       .delete("/api/current_user/deleteProject/Misc")
       .expect(200)
       .end((err, res) => {
@@ -385,7 +385,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
   });
 
   it("should not delete named project from user object of other users", (done) => {
-    server // logged in as user 1
+    agent // logged in as user 1
       .delete("/api/current_user/deleteProject/Misc")
       .expect(200)
       .end((err, res) => {
@@ -403,7 +403,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
   });
 
   it("should not delete todos of other users with the same project name", (done) => {
-    server // logged in as user 1
+    agent // logged in as user 1
       .delete("/api/current_user/deleteProject/Misc")
       .expect(200)
       .end((err, res) => {
@@ -428,7 +428,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
 describe("PATCH /api/current_user/editProjectName/:id", () => {
   it("should change project name in user's projects array", (done) => {
-    server
+    agent
       .patch(`/api/current_user/editProjectName/${users[0].projects[0]._id}`)
       .send({ newName: "ENS" })
       .expect(200)
@@ -446,7 +446,7 @@ describe("PATCH /api/current_user/editProjectName/:id", () => {
   });
 
   it("should change category of associated todos to the new name", (done) => {
-    server
+    agent
       .patch(`/api/current_user/editProjectName/${users[0].projects[0]._id}`)
       .send({ oldName: "Misc", newName: "ENS" })
       .expect(200)
@@ -464,7 +464,7 @@ describe("PATCH /api/current_user/editProjectName/:id", () => {
 
 describe("PATCH /api/current_user/editProjectColor/:id", () => {
   it("should change the associated color of the project in user object", (done) => {
-    server
+    agent
       .patch(`/api/current_user/editProjectColor/${users[0].projects[0]._id}`)
       .send({ color: "red" })
       .expect(200)
@@ -484,7 +484,7 @@ describe("PATCH /api/current_user/editProjectColor/:id", () => {
 
 describe("PATCH /api/current_user/updateProjectOrder", () => {
   it("should change the order of the user's projects array", (done) => {
-    server
+    agent
       .patch("/api/current_user/updateProjectOrder")
       .send({ oldIndex: 0, newIndex: 1 })
       .expect(200)
@@ -508,9 +508,12 @@ describe("PATCH /api/current_user/updateProjectOrder", () => {
 
 describe("GET /api/logout", () => {
   it("should log user out", (done) => {
-    server
+    agent
       .get("/api/logout")
       .expect(302)
       .end(done);
   });
 });
+
+// close Server
+server.close();

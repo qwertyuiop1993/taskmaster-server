@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test jest",
+    "test": "NODE_ENV=test jest --detectOpenHandles",
     "dev": "nodemon index.js",
     "start": "node index.js",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix taskmaster-client && npm run build --prefix taskmaster-client"
