@@ -355,10 +355,10 @@ describe("PATCH /api/current_user/addProject", () => {
   });
 });
 
-describe("DELETE /api/current_user/deleteProject/:name", () => {
+describe("DELETE /api/current_user/deleteProject/:id", () => {
   it("should delete named project from user object", (done) => {
     agent
-      .delete("/api/current_user/deleteProject/Misc")
+      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.projects.length).toEqual(1);
@@ -369,7 +369,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
   it("should delete todos associated with the project from the db", (done) => {
     agent
-      .delete("/api/current_user/deleteProject/Misc")
+      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
@@ -386,7 +386,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
   it("should not delete named project from user object of other users", (done) => {
     agent // logged in as user 1
-      .delete("/api/current_user/deleteProject/Misc")
+      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
@@ -404,7 +404,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
   it("should not delete todos of other users with the same project name", (done) => {
     agent // logged in as user 1
-      .delete("/api/current_user/deleteProject/Misc")
+      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
@@ -420,7 +420,7 @@ describe("DELETE /api/current_user/deleteProject/:name", () => {
 
   it("should not let users who are not logged in manipulate projects", (done) => {
     request(app) // not logged in
-      .delete("/api/current_user/deleteProject/Misc")
+      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
       .expect(401)
       .end(done);
   });

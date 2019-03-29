@@ -25,12 +25,13 @@ module.exports.addProject = async (req, res, next) => {
 };
 
 module.exports.deleteProject = async (req, res, next) => {
-  const projectToDelete = req.params.name;
+  const id = req.params.id;
+  const projectToDelete = req.user.projects.filter(project => project.id  === id)[0];
 
   // delete the todos associated with this project
   const deletedTodos = await Todo.deleteMany({
     _creator: req.user._id,
-    category: projectToDelete,
+    category: projectToDelete.name,
   });
 
   if(!deletedTodos) {
@@ -39,7 +40,7 @@ module.exports.deleteProject = async (req, res, next) => {
 
   // filter out the project to delete from the new projects array
   const newProjectsArray = req.user.projects.filter((project) => {
-    return project.name !== projectToDelete;
+    return project.id !== id;
   });
 
   const updatedUser = await User.findOneAndUpdate(

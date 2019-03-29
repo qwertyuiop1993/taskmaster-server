@@ -5,7 +5,6 @@ const TodoController = require("./controllers/todoController");
 
 // middlewares
 const requireGoogleLogin = passport.authenticate("google", { scope: ["profile", "email"] });
-
 let requireMockLogin;
 if(process.env.NODE_ENV === "test") {
   requireMockLogin = passport.authenticate("mock");
@@ -37,13 +36,12 @@ module.exports = function(app) {
   app.patch("/api/current_user/editProjectColor/:id", requireLogin, UserController.editProjectColor);
   app.patch("/api/current_user/editProjectImage/:id", requireLogin, UserController.editProjectImage);
   app.patch("/api/current_user/updateProjectOrder", requireLogin, UserController.updateProjectOrder);
-  app.delete("/api/current_user/deleteProject/:name", requireLogin, UserController.deleteProject);
+  app.delete("/api/current_user/deleteProject/:id", requireLogin, UserController.deleteProject);
 
   app.get("/api/logout", (req, res) => {
     req.logout();
     res.redirect("/");
   });
-
 
   // todo routes
   app.post("/api/todos", requireLogin, TodoController.createTodo);
