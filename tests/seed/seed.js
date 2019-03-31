@@ -44,6 +44,7 @@ const todos = [
     _id: new ObjectID(),
     text: "Second test todo",
     category: "Misc",
+    dueDate: "15/02/2020",
     _creator: userOneId
   },
   {

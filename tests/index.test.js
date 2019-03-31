@@ -97,6 +97,31 @@ describe("GET /api/todos/:id", () => {
   });
 });
 
+describe("GET /api/todos/filter", () => {
+    it("should filter todos by category", (done) => {
+      agent
+        .get("/api/todos/filter/?category=Misc")
+        .expect(200)
+        .expect(res => {
+          expect(res.body.todos.length).toBe(2);
+          expect(res.body.todos[0].text).toBe("First test todo");
+          expect(res.body.todos[1].text).toBe("Second test todo");
+        })
+        .end(done);
+    });
+
+    it("should fiter todos by dueDate", (done) => {
+      agent
+        .get("/api/todos/filter/?dueDate!=null")
+        .expect(200)
+        .expect(res => {
+          expect(res.body.todos.length).toBe(1);
+          expect(res.body.todos[0].text).toBe("Second test todo");
+        })
+        .end(done);
+    });
+});
+
 describe("POST /api/todos", () => {
   it("should add a todo to the database", (done) => {
     const text = "This is a test";
@@ -327,9 +352,6 @@ describe("PATCH /api/todos/updateProject/:id", () => {
         })
       })
   });
-
-
-
 });
 
 // Project tests

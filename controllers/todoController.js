@@ -1,6 +1,7 @@
 const { Todo } = require("../models/todo");
 const { ObjectID } = require("mongodb");
 const _ = require("lodash");
+const aqp = require("api-query-params");
 
 module.exports.createTodo = async (req, res, next) => {
   try {
@@ -28,11 +29,26 @@ module.exports.getTodos = async (req, res, next) => {
   }
 };
 
-module.exports.getTodosByDueDate = async (req, res, next) => {
+module.exports.filterTodos = async (req, res, next) => {
   try {
+    // convert any != queries into mongodb { $ne: value } filter and change null strings to null values
+    const query = {};
+    for (let key in req.query) {
+      if (req.query[key] === "null") {
+        req.query[key] = null;
+      }
+      // if the last letter of the key is ! correct the key name and set the mongodb $ne as value
+      if (key[key.length - 1] === "!") {
+        var newKey = key.slice(0, key.length - 1);
+        query[newKey] = { $ne: req.query[key] };
+      } else {
+        query[key] = req.query[key];
+      }
+    }
+
     const todos = await Todo.find({
-      _creator: req.user._id, // find all the todos created by the user
-      dueDate: { $ne: null }
+      _creator: req.user._id,
+      ...query
     });
     res.send({ todos });
   } catch (err) {
@@ -67,18 +83,6 @@ module.exports.getTodoCount = async (req, res, next) => {
   }
 };
 
-module.exports.getTodosByCategory = async (req, res, next) => {
-  try {
-    const { category } = req.params;
-    const todos = await Todo.find({
-      _creator: req.user._id,
-      category: category
-    });
-    res.send({ todos });
-  } catch (err) {
-    res.status(400).send(err);
-  }
-};
 
 module.exports.getTodoById = async (req, res, next) => {
   const { id } = req.params;
@@ -206,5 +210,4 @@ module.exports.updateTodoProject = async (req, res, next) => {
     return res.status(404).send();
   }
   res.status(200).send({ todos: updatedOldProject });
-
 };
