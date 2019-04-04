@@ -31,19 +31,12 @@ module.exports.getTodos = async (req, res, next) => {
 
 module.exports.filterTodos = async (req, res, next) => {
   try {
-    // convert any != queries into mongodb { $ne: value } filter and change null strings to null values
-    const query = {};
-    for (let key in req.query) {
-      if (req.query[key] === "null") {
-        req.query[key] = null;
-      }
-      // if the last letter of the key is ! correct the key name and set the mongodb $ne as value
-      if (key[key.length - 1] === "!") {
-        var newKey = key.slice(0, key.length - 1);
-        query[newKey] = { $ne: req.query[key] };
-      } else {
-        query[key] = req.query[key];
-      }
+    // convert any dueDate!=null queries into mongodb { $ne: null } 
+    let query = {};
+    if(req.query["dueDate!"]) {
+      query.dueDate = { $ne: req.query[key] };
+    } else {
+      query = req.query
     }
 
     const todos = await Todo.find({
