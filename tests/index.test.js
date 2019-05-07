@@ -98,28 +98,28 @@ describe("GET /api/todos/:id", () => {
 });
 
 describe("GET /api/todos/filter", () => {
-    it("should filter todos by category", (done) => {
-      agent
-        .get("/api/todos/filter/?category=Misc")
-        .expect(200)
-        .expect(res => {
-          expect(res.body.todos.length).toBe(2);
-          expect(res.body.todos[0].text).toBe("First test todo");
-          expect(res.body.todos[1].text).toBe("Second test todo");
-        })
-        .end(done);
-    });
+  it("should filter todos by category", (done) => {
+    agent
+      .get(`/api/todos/filter/?project=${users[0].projects[0]._id}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todos.length).toBe(2);
+        expect(res.body.todos[0].text).toBe("First test todo");
+        expect(res.body.todos[1].text).toBe("Second test todo");
+      })
+      .end(done);
+  });
 
-    it("should fiter todos by dueDate", (done) => {
-      agent
-        .get("/api/todos/filter/?dueDate!=null")
-        .expect(200)
-        .expect(res => {
-          expect(res.body.todos.length).toBe(1);
-          expect(res.body.todos[0].text).toBe("Second test todo");
-        })
-        .end(done);
-    });
+  it("should fiter todos by dueDate", (done) => {
+    agent
+      .get("/api/todos/filter/?dueDate!=null")
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todos.length).toBe(1);
+        expect(res.body.todos[0].text).toBe("Second test todo");
+      })
+      .end(done);
+  });
 });
 
 describe("POST /api/todos", () => {
@@ -297,28 +297,35 @@ describe("PATCH /api/todos/:id", () => {
 });
 
 describe("GET /api/todos/count", () => {
+  const miscId = users[0].projects[0]._id;
+  const workId = users[0].projects[1]._id;
+
   it("should return a count of all the todos in each project", (done) => {
     agent
       .get("/api/todos/count")
       .expect(200)
       .expect((res) => {
-        expect(res.body.Misc).toEqual(2);
+        expect(res.body[miscId]).toEqual(2);
         expect(res.body.Inbox).toEqual(0);
-        expect(res.body.Work).toEqual(0);
+        expect(res.body[workId]).toEqual(0);
       })
       .end(done);
   });
 });
 
 describe("PATCH /api/todos/updateProject/:id", () => {
+  const miscId = users[0].projects[0]._id;
+  const workId = users[0].projects[1]._id;
+
   it("should change the relevant todo's project and give it an indexInList of 0", (done) => {
     agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
-      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .send({ oldProject: miscId, newProject: workId, indexInList: 0 })
       .expect(200)
       .end((err, res) => {
         Todo.findOne({ _id: todos[0]._id }).then((todo) => {
-          expect(todo.category).toBe("Work");
+          const idUpdated = todo.project == workId;
+          expect(idUpdated).toBe(true);
           expect(todo.indexInList).toEqual(0);
           done();
         });
@@ -328,29 +335,29 @@ describe("PATCH /api/todos/updateProject/:id", () => {
   it("should add the todo to the new project and change the indexes appropriately", (done) => {
     agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
-      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .send({ oldProject: miscId, newProject: workId, indexInList: 0 })
       .expect(200)
       .end((err, res) => {
-        Todo.find({ _creator: users[0]._id , category: "Work" }).then(todos => {
+        Todo.find({ _creator: users[0]._id, project: workId }).then((todos) => {
           expect(todos.length).toEqual(1);
           expect(todos[0].text).toBe("First test todo");
           done();
-        })
-      })
-  })
+        });
+      });
+  });
 
   it("should remove the todo from the old project and change the indexes appropriately", (done) => {
     agent
       .patch(`/api/todos/updateProject/${todos[0]._id}`)
-      .send({ oldProject: "Misc", newProject: "Work", indexInList: 0 })
+      .send({ oldProject: miscId, newProject: workId, indexInList: 0 })
       .expect(200)
       .end((err, res) => {
-        Todo.find({ _creator: users[0]._id , category: "Misc" }).then(todos => {
+        Todo.find({ _creator: users[0]._id, project: miscId }).then((todos) => {
           expect(todos.length).toEqual(1);
           expect(todos[0].text).toBe("Second test todo");
           done();
-        })
-      })
+        });
+      });
   });
 });
 
@@ -378,9 +385,11 @@ describe("PATCH /api/current_user/addProject", () => {
 });
 
 describe("DELETE /api/current_user/deleteProject/:id", () => {
+  const miscId = users[0].projects[0]._id;
+  const workId = users[0].projects[1]._id;
   it("should delete named project from user object", (done) => {
     agent
-      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
+      .delete(`/api/current_user/deleteProject/${miscId}`)
       .expect(200)
       .expect((res) => {
         expect(res.body.projects.length).toEqual(1);
@@ -391,13 +400,13 @@ describe("DELETE /api/current_user/deleteProject/:id", () => {
 
   it("should delete todos associated with the project from the db", (done) => {
     agent
-      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
+      .delete(`/api/current_user/deleteProject/${miscId}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
-        Todo.find({ _creator: users[0]._id, category: "Misc" })
+        Todo.find({ _creator: users[0]._id, category: miscId })
           .then((todos) => {
             expect(todos.length).toEqual(0);
             done();
@@ -408,7 +417,7 @@ describe("DELETE /api/current_user/deleteProject/:id", () => {
 
   it("should not delete named project from user object of other users", (done) => {
     agent // logged in as user 1
-      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
+      .delete(`/api/current_user/deleteProject/${miscId}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
@@ -426,14 +435,14 @@ describe("DELETE /api/current_user/deleteProject/:id", () => {
 
   it("should not delete todos of other users with the same project name", (done) => {
     agent // logged in as user 1
-      .delete(`/api/current_user/deleteProject/${users[0].projects[0]._id}`)
+      .delete(`/api/current_user/deleteProject/${miscId}`)
       .expect(200)
       .end((err, res) => {
         if (err) {
           return done(err);
         }
         // user 2 should still have todos associated with Misc
-        Todo.find({ _creator: users[1]._id, category: "Misc" }).then((todos) => {
+        Todo.find({ _creator: users[1]._id, project: users[1].projects[0]._id }).then((todos) => {
           expect(todos.length).toEqual(1);
           done();
         });
@@ -461,22 +470,6 @@ describe("PATCH /api/current_user/editProjectName/:id", () => {
         User.findOne({ _id: users[0]._id })
           .then((user) => {
             expect(user.projects[0].name).toBe("ENS");
-            done();
-          })
-          .catch((err) => done(err));
-      });
-  });
-
-  it("should change category of associated todos to the new name", (done) => {
-    agent
-      .patch(`/api/current_user/editProjectName/${users[0].projects[0]._id}`)
-      .send({ oldName: "Misc", newName: "ENS" })
-      .expect(200)
-      .end((err, res) => {
-        Todo.find({ _creator: users[0]._id, category: "ENS" })
-          .then((todos) => {
-            expect(todos[0].text).toBe("First test todo");
-            expect(todos[1].text).toBe("Second test todo");
             done();
           })
           .catch((err) => done(err));

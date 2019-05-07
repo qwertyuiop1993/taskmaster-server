@@ -9,7 +9,7 @@ module.exports.createTodo = async (req, res, next) => {
       // create new todo instance to save to database
       text: req.body.text,
       dueDate: req.body.dueDate || null,
-      category: req.body.category,
+      project: req.body.project,
       _creator: req.user._id // get user id and set it as creator on the newly created todo
     }).save();
     res.send(todo);
@@ -31,12 +31,19 @@ module.exports.getTodos = async (req, res, next) => {
 
 module.exports.filterTodos = async (req, res, next) => {
   try {
-    // convert any dueDate!=null queries into mongodb { $ne: null } 
-    let query = {};
-    if(req.query["dueDate!"]) {
-      query.dueDate = { $ne: req.query[key] };
-    } else {
-      query = req.query
+    // convert any != queries into mongodb { $ne: value } filter and change null strings to null values
+    const query = {};
+    for (let key in req.query) {
+      if (req.query[key] === "null") {
+        req.query[key] = null;
+      }
+      // if the last letter of the key is ! correct the key name and set the mongodb $ne as value
+      if (key[key.length - 1] === "!") {
+        var newKey = key.slice(0, key.length - 1);
+        query[newKey] = { $ne: req.query[key] };
+      } else {
+        query[key] = req.query[key];
+      }
     }
 
     const todos = await Todo.find({
@@ -56,11 +63,11 @@ module.exports.getTodoCount = async (req, res, next) => {
     });
 
     const count = {};
-    const projects = [{ name: "Inbox" }, ...req.user.projects];
+    const projects = [{ id: "Inbox", name: "Inbox" }, ...req.user.projects];
     // set the count for each project at 0 to start with
-    projects.forEach((project) => (count[project.name] = 0));
+    projects.forEach((project) => (count[project.id] = 0));
     todos.forEach((todo) => {
-      count[todo.category]++;
+      count[todo.project]++;
     });
 
     const todosWithDueDate = await Todo.find({
@@ -152,14 +159,12 @@ module.exports.updateTodoProject = async (req, res, next) => {
   // find all associated todos from the oldProject
   const todos = await Todo.find({
     _creator: req.user._id,
-    category: oldProject
+    project: oldProject
   });
   // sort the todos by indexInList
   const sortedTodos = [...todos].sort((a, b) => a.indexInList - b.indexInList);
   // take away todo that has been moved
   sortedTodos.splice(indexInList, 1);
-
-  console.log("sortedTodos without edited todo", sortedTodos);
 
   // go through the reordered array and assign the new index of each todo to the todo in the database
   sortedTodos.forEach(async (todo, index) => {
@@ -177,7 +182,7 @@ module.exports.updateTodoProject = async (req, res, next) => {
   await Todo.updateMany(
     {
       _creator: req.user._id,
-      category: newProject
+      project: newProject
     },
     { $inc: { indexInList: 1 } },
     { new: true }
@@ -189,14 +194,14 @@ module.exports.updateTodoProject = async (req, res, next) => {
       _id: id,
       _creator: req.user._id
     },
-    { $set: { indexInList: 0, category: newProject } },
+    { $set: { indexInList: 0, project: newProject } },
     { new: true }
   );
 
   // send the updated todos in the old project
   const updatedOldProject = await Todo.find({
     _creator: req.user._id,
-    category: oldProject
+    project: oldProject
   });
 
   if (!updatedOldProject) {

@@ -31,7 +31,7 @@ module.exports.deleteProject = async (req, res, next) => {
   // delete the todos associated with this project
   const deletedTodos = await Todo.deleteMany({
     _creator: req.user._id,
-    category: projectToDelete.name,
+    project: projectToDelete.id,
   });
 
   if(!deletedTodos) {
@@ -120,18 +120,6 @@ module.exports.editProjectName = async (req, res, next) => {
   const projectId = req.params.id;
   const oldName = req.body.oldName;
   const newName = req.body.newName;
-
-  // update todos to be associated with new name
-  const updatedTodos = await Todo.updateMany(
-    { _creator: req.user._id, category: oldName },
-    { $set: { category: newName } },
-    { new: true }
-  );
-
-  if(!updatedTodos) {
-    return res.status(404).send();
-  }
-  // update user to have new name in projects array
 
   const updatedUser = await User.findOneAndUpdate(
     {

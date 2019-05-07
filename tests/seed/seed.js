@@ -37,20 +37,20 @@ const todos = [
   {
     _id: new ObjectID(),
     text: "First test todo",
-    category: "Misc",
+    project: projectOneId,
     _creator: userOneId
   },
   {
     _id: new ObjectID(),
     text: "Second test todo",
-    category: "Misc",
+    project: projectOneId,
     dueDate: "15/02/2020",
     _creator: userOneId
   },
   {
     _id: new ObjectID(),
     text: "Third test todo",
-    category: "Misc",
+    project: projectThreeId,
     completed: true,
     completedAt: new Date().getTime(),
     _creator: userTwoId

@@ -8,7 +8,7 @@ const Todo = mongoose.model('Todo', {
     minlength: 1,
     trim: true
   },
-  category: {
+  project: {
     type: String,
     default: "Inbox"
   },
